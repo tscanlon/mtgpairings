@@ -1,0 +1,10 @@
+{% extends "layout.html" %}
+{% block body %}
+  <ul class=events>
+  {% for event in events %}
+  <li><h2>{{ event.event_name }} {{ event.format }}</h2>
+  {% else %}
+    <li><em>There are no events in the system</em>
+  {% endfor %}
+  </ul>
+{% endblock %}
