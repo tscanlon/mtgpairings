@@ -7,4 +7,18 @@
     <li><em>There are no events in the system</em>
   {% endfor %}
   </ul>
+  <form action="{{ url_for('add_event') }}" method=post class=add_event>
+    <dl>
+      <dt>Event Name:
+      <dd><input type=text size=30 name=event_name>
+      <dt>Event Format:
+      <dd><select name=mtg_format>
+        <option value="Standard">Standard</option>
+        <option value="Modern">Modern</option>
+        <option value="Legacy">Legacy</option>
+        <option value="Draft">Draft</option>
+      </select>
+      <dd><input type=submit value="Create Event">
+    </dl>
+  </form>
 {% endblock %}
