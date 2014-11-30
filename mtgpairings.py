@@ -53,9 +53,18 @@ def show_event_form():
     events = [dict(event_id=row[0], event_name=row[1], mtg_format=row[2]) for row in query_db(query)]
     return render_template('events.html', events=events)
 
-@app.route('/event/<int:event_id>', methods=['GET'])
+@app.route('/event/<int:event_id>', methods=['GET', 'POST'])
 def show_event(event_id):
-    query = 'select event_name, mtg_format from events where id=?'
+    if request.method == 'POST':
+        query = 'insert into rounds (round_number, event_id, pairings) values (?, ?, ?)'
+        args = [request.form['round_number'], request.form['event_id'], request.form['pairings']]
+        query_db(query, args)
+        flash('Added round %s' % request.form['round_number'])
+    # query = 'select event_name, mtg_format from events where id=?'
+    query = ('select events.name, events.format, '
+             'rounds.id, rounds.number '
+             'from events where events.id=? '
+             'inner join rounds on events.id=rounds.event_id;')
     row = query_db(query, args=[event_id], one=True)
     event = dict(event_id=event_id, event_name=row[0], mtg_format=row[1])
     return render_template('show_event.html', event=event)

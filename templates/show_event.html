@@ -1,10 +1,10 @@
 {% extends "layout.html" %}
 {% block body %}
-  <h2>{{ event.event_name }} {{ event.format }}</h2>
+  <h2>{{ event.event_name }}: {{ event.mtg_format }}</h2>
   </ul>
-  <form action="{{ url_for('add_round') }}" method=post class=add_event>
+  <form action="{{ url_for('show_event', event_id=event.event_id) }}" method=post class=add_event>
     <dl>
-      <dt>Event Name:
+      <dt>Round Number:
       <dd><input type=text size=30 name=round_number>
       <dd><textarea name=pairings rows=5 cols=80>Paste Pairings here.</textarea>
       <dd><input type=submit value="Create Round">
