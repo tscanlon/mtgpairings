@@ -32,16 +32,32 @@ def teardown_request(exception):
     if db is not None:
         db.close()
 
+def connect_db():
+    return sqlite3.connect(app.config['DATABASE'])
+
+def get_db():
+    db = getattr(g, '_database', None)
+    if db is None:
+        db = g._database = connect_db()
+    return db
+
+def query_db(query, args=(), one=False):
+    cur = get_db().execute(query, args)
+    rv = cur.fetchall()
+    cur.close()
+    return (rv[0] if rv else None) if one else rv
+
 @app.route('/')
 def show_event_form():
-    cur = g.db.execute('select id, event_name, mtg_format from events order by id desc')
-    events = [dict(event_id=row[0], event_name=row[1], mtg_format=row[2]) for row in cur.fetchall()]
+    query = 'select id, event_name, mtg_format from events order by id desc'
+    events = [dict(event_id=row[0], event_name=row[1], mtg_format=row[2]) for row in query_db(query)]
     return render_template('events.html', events=events)
 
 @app.route('/event/<int:event_id>', methods=['GET'])
 def show_event(event_id):
-    cur = g.db.execute('select event_name, mtg_format from events where id=%d'%event_id)
-    event = [dict(event_id=event_id, event_name=row[0], mtg_format=row[1]) for row in cur.fetchall()]
+    query = 'select event_name, mtg_format from events where id=?'
+    row = query_db(query, args=[event_id], one=True)
+    event = dict(event_id=event_id, event_name=row[0], mtg_format=row[1])
     return render_template('show_event.html', event=event)
 
 @app.route('/add_round', methods=['POST'])
@@ -51,12 +67,11 @@ def add_round():
 
 @app.route('/add_event', methods=['POST'])
 def add_event():
-    g.db.execute('insert into events (event_name, mtg_format) values (?, ?)',
-            [request.form['event_name'], request.form['mtg_format']])
-    g.db.commit()
+    query = 'insert into events (event_name, mtg_format) values (?, ?)'
+    args = [request.form['event_name'], request.form['mtg_format']]
+    query_db(query, args)
     flash('New event was successfully created')
-    # url_for('method_name')
     return redirect(url_for('show_event_form'))
 
 if __name__ == '__main__':
-    app.run()
+    app.run(host='0.0.0.0')
