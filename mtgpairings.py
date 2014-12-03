@@ -60,14 +60,20 @@ def show_event(event_id):
         args = [request.form['round_number'], request.form['event_id'], request.form['pairings']]
         query_db(query, args)
         flash('Added round %s' % request.form['round_number'])
-    # query = 'select event_name, mtg_format from events where id=?'
-    query = ('select events.name, events.format, '
-             'rounds.id, rounds.number '
-             'from events where events.id=? '
-             'inner join rounds on events.id=rounds.event_id;')
-    row = query_db(query, args=[event_id], one=True)
-    event = dict(event_id=event_id, event_name=row[0], mtg_format=row[1])
-    return render_template('show_event.html', event=event)
+    # note on the order of sql statements:
+    # select from inner join on where
+    query = ('select events.event_name, events.mtg_format, '
+             'rounds.id, rounds.round_number '
+             'from events ' 
+             'inner join rounds on events.id=rounds.event_id '
+             'where events.id=?;')
+    rows = query_db(query, args=[event_id])
+    rounds = []
+    for row in rows:
+        event = dict(event_id=event_id, event_name=row[0], mtg_format=row[1],
+                 round_id=row[2], round_number=row[3])
+        rounds.append(event)
+    return render_template('show_event.html', rounds=rounds)
 
 @app.route('/add_round', methods=['POST'])
 def add_round():
