@@ -53,6 +53,20 @@ def show_event_form():
     events = [dict(event_id=row[0], event_name=row[1], mtg_format=row[2]) for row in query_db(query)]
     return render_template('events.html', events=events)
 
+@app.route('/event/<int:event_id>/<int:round_number>')
+def show_round(event_id, round_number):
+    # select from inner join on where
+    query = ('select events.event_name, events.mtg_format, rounds.pairings '
+             'from events '
+             'inner join rounds '
+             'on events.id=rounds.event_id '
+             'where rounds.round_number=? and events.id=?;')
+    args = [round_number, event_id]
+    row = query_db(query, args, one=True)
+    print row
+    roundinfo = dict(event_name=row[0], mtg_format=row[1], event_id=event_id, round_number=round_number, pairings=row[2])
+    return render_template('round.html', roundinfo=roundinfo)
+
 @app.route('/event/<int:event_id>', methods=['GET', 'POST'])
 def show_event(event_id):
     if request.method == 'POST':
