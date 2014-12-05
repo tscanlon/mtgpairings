@@ -3,7 +3,7 @@
   <h2>{{ rounds[0].event_name }}: {{ rounds[0].mtg_format }}</h2>
   <ul>
     {% for round in rounds %}
-    <li><a href={{ url_for('show_round', event_id=round.event_id, round_number=round.round_number) }}> {{ round.round_number }} </li>
+    <li><a href={{ url_for('show_round', event_id=round.event_id, round_number=round.round_number) }}> {{ round.round_number }}</a> </li>
     {% endfor %}
   </ul>
   <form action="{{ url_for('show_event', event_id=rounds[0].event_id) }}" method=post class=add_event>
