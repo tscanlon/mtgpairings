@@ -47,9 +47,15 @@ def query_db(query, args=(), one=False):
     cur.close()
     return (rv[0] if rv else None) if one else rv
 
+def insert_db(query, args=()):
+    con = get_db()
+    con.execute(query, args)
+    con.commit()
+    con.close()
+
 @app.route('/')
 def show_event_form():
-    query = 'select id, event_name, mtg_format from events order by id desc'
+    query = 'select id, event_name, mtg_format from events order by id desc;'
     events = [dict(event_id=row[0], event_name=row[1], mtg_format=row[2]) for row in query_db(query)]
     return render_template('events.html', events=events)
 
@@ -70,15 +76,15 @@ def show_round(event_id, round_number):
 @app.route('/event/<int:event_id>', methods=['GET', 'POST'])
 def show_event(event_id):
     if request.method == 'POST':
-        query = 'insert into rounds (round_number, event_id, pairings) values (?, ?, ?)'
+        query = 'insert into rounds (round_number, event_id, pairings) values (?, ?, ?);'
         args = [request.form['round_number'], request.form['event_id'], request.form['pairings']]
-        query_db(query, args)
+        insert_db(query, args)
         flash('Added round %s' % request.form['round_number'])
     # note on the order of sql statements:
     # select from inner join on where
     query = ('select events.event_name, events.mtg_format, '
              'rounds.id, rounds.round_number '
-             'from events ' 
+             'from events '
              'inner join rounds on events.id=rounds.event_id '
              'where events.id=?;')
     rows = query_db(query, args=[event_id])
@@ -96,9 +102,9 @@ def add_round():
 
 @app.route('/add_event', methods=['POST'])
 def add_event():
-    query = 'insert into events (event_name, mtg_format) values (?, ?)'
+    query = 'insert into events (event_name, mtg_format) values (?, ?);'
     args = [request.form['event_name'], request.form['mtg_format']]
-    query_db(query, args)
+    insert_db(query, args)
     flash('New event was successfully created')
     return redirect(url_for('show_event_form'))
 
