@@ -51,7 +51,6 @@ def insert_db(query, args=()):
     con = get_db()
     con.execute(query, args)
     con.commit()
-    con.close()
 
 @app.route('/')
 def show_event_form():
@@ -80,20 +79,19 @@ def show_event(event_id):
         args = [request.form['round_number'], request.form['event_id'], request.form['pairings']]
         insert_db(query, args)
         flash('Added round %s' % request.form['round_number'])
-    # note on the order of sql statements:
-    # select from inner join on where
-    query = ('select events.event_name, events.mtg_format, '
-             'rounds.id, rounds.round_number '
-             'from events '
-             'inner join rounds on events.id=rounds.event_id '
-             'where events.id=?;')
-    rows = query_db(query, args=[event_id])
-    rounds = []
-    for row in rows:
-        event = dict(event_id=event_id, event_name=row[0], mtg_format=row[1],
-                 round_id=row[2], round_number=row[3])
-        rounds.append(event)
-    return render_template('show_event.html', rounds=rounds)
+    event_query = 'select event_name, mtg_format from events where id=?;'
+    event_row = query_db(event_query, args=[event_id], one=True)
+    event = dict(event_id=event_id,
+                 event_name=event_row[0],
+                 mtg_format=event_row[1],
+                 rounds=[])
+    round_query = 'select id, round_number, pairings from rounds where event_id=?'
+    rows = query_db(round_query, args=[event_id])
+    if rows:
+        for row in rows:
+            round = dict(round_id=row[0], round_number=row[1], pairings=row[2])
+            event['rounds'].append(round)
+    return render_template('show_event.html', event=event)
 
 @app.route('/add_round', methods=['POST'])
 def add_round():

@@ -1,18 +1,18 @@
 {% extends "layout.html" %}
 {% block body %}
-  <h2>{{ rounds[0].event_name }}: {{ rounds[0].mtg_format }}</h2>
-  <ul>
-    {% for round in rounds %}
-    <li><a href={{ url_for('show_round', event_id=round.event_id, round_number=round.round_number) }}> {{ round.round_number }}</a> </li>
+  <h2>{{ event.event_name }}: {{ event.mtg_format }}</h2>
+  <ul> Rounds:
+    {% for round in event['rounds'] if event['rounds'] %}
+    <li><a href={{ url_for('show_round', event_id=event.event_id, round_number=round.round_number) }}> {{ round.round_number }}</a> </li>
     {% endfor %}
   </ul>
-  <form action="{{ url_for('show_event', event_id=rounds[0].event_id) }}" method=post class=add_event>
+  <form action="{{ url_for('show_event', event_id=event.event_id) }}" method=post class=add_event>
     <dl>
       <dt>Round Number:
       <dd><input type=text size=30 name=round_number>
       <dd><textarea name=pairings rows=5 cols=80>Paste Pairings here.</textarea>
       <dd><input type=submit value="Create Round">
-      <input type=hidden name=event_id value={{ rounds[0].event_id }}>
+      <input type=hidden name=event_id value={{ event.event_id }}>
     </dl>
   </form>
 {% endblock %}
