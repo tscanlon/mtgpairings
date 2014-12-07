@@ -1,0 +1,5 @@
+{% extends "layout.html" %}
+{% block body %}
+<h2> <a href={{ url_for('show_event', event_id=roundinfo.event_id) }}>{{ roundinfo.event_name }}: {{ roundinfo.mtg_format }}</a> round {{ roundinfo.round_number }}</h2>
+  <div class=pairings> {{ roundinfo.pairings }} </div>
+{% endblock %}

@@ -1,0 +1,24 @@
+{% extends "layout.html" %}
+{% block body %}
+  <ul class=events>
+  {% for event in events %}
+  <li><h2><a href='{{ url_for('show_event', event_id=event.event_id) }}' >{{ event.event_name }}: {{ event.mtg_format }} </a></h2>
+  {% else %}
+    <li><em>There are no events in the system</em>
+  {% endfor %}
+  </ul>
+  <form action="{{ url_for('add_event') }}" method=post class=add_event>
+    <dl>
+      <dt>Event Name:
+      <dd><input type=text size=30 name=event_name>
+      <dt>Event Format:
+      <dd><select name=mtg_format>
+        <option value="Standard">Standard</option>
+        <option value="Modern">Modern</option>
+        <option value="Legacy">Legacy</option>
+        <option value="Draft">Draft</option>
+      </select>
+      <dd><input type=submit value="Create Event">
+    </dl>
+  </form>
+{% endblock %}
