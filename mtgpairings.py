@@ -67,6 +67,8 @@ def show_round(event_id, round_number):
              'on events.id=rounds.event_id '
              'where rounds.round_number=? and events.id=?;')
     args = [round_number, event_id]
+    for arg in args:
+        print arg
     row = query_db(query, args, one=True)
     print row
     roundinfo = dict(event_name=row[0], mtg_format=row[1], event_id=event_id, round_number=round_number, pairings=row[2])
